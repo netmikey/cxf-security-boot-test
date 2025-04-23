@@ -33,7 +33,7 @@ public class CxfAttachmentStreamingTest {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
         .getLogger(CxfAttachmentStreamingTest.class);
 
-    private static final String ENDPOINT_URL = "http://127.0.0.1:8080/services/ExampleService/ExamplePort";
+    private static final String ENDPOINT_URL = "http://127.0.0.1:8081/services/ExampleService/ExamplePort";
 
     @Autowired
     private StreamingFinishedTimestampHolder streamingFinishedTimestampHolder;
