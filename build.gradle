@@ -1,0 +1,77 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.4'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+ext {
+    cxfVersion = '4.1.1'
+    cxfGeneratedSrcDir = "${project.buildDir}/generated-src/cxf-jaxb"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main.java.srcDirs(cxfGeneratedSrcDir)
+}
+
+configurations {
+    cxfTool
+}
+
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter')
+    implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws:${cxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-ws-policy:${cxfVersion}")
+    implementation("org.apache.cxf:cxf-rt-ws-security:${cxfVersion}") {
+        // avoids dependency issues
+        exclude group: 'org.opensaml'
+    }
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+
+    cxfTool("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:${cxfVersion}")
+    cxfTool("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:${cxfVersion}")
+    cxfTool("ch.qos.logback:logback-classic")
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+task wsdl2java(type: JavaExec) {
+
+    inputs.dir("${project.projectDir}/src/main/resources/com/example/cxf_security_boot_test/wsdl")
+    outputs.dir(cxfGeneratedSrcDir)
+
+    jvmArgs '-Dfile.encoding=UTF8'
+    mainClass = 'org.apache.cxf.tools.wsdlto.WSDLToJava'
+    classpath = configurations.cxfTool
+    args '-b', "${projectDir}/binding.xjb"
+    args '-d', cxfGeneratedSrcDir
+    args '-impl'
+    args '-quiet'
+    args '-validate'
+    args '-p', 'com.example.cxf_security_boot_test.bindings'
+    args '-wsdlLocation', 'com/example/cxf_security_boot_test/wsdl/ExampleService.wsdl'
+    args "${project.projectDir}/src/main/resources/com/example/cxf_security_boot_test/wsdl/ExampleService.wsdl"
+
+    doFirst {
+        delete(cxfGeneratedSrcDir)
+    }
+}
+
+compileJava.dependsOn wsdl2java

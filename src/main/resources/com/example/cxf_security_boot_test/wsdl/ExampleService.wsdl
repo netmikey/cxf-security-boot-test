@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="ExampleService-v1" targetNamespace="http://example.org/v1"
+                  xmlns="http://example.org/v1"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:wsp="http://www.w3.org/ns/ws-policy"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:xmime="http://www.w3.org/2005/05/xmlmime" 
+                  xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://example.org/v1" xmlns="http://example.org/v1">
+
+            <xs:complexType name="ExampleOperationRequestType">
+                <xs:sequence>
+                   	<xs:element name="parameter" type="xs:string" minOccurs="0" maxOccurs="1" />
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:complexType name="ExampleOperationResponseType">
+                <xs:sequence>
+                   	<xs:element name="data" type="xs:base64Binary" xmime:expectedContentTypes="application/octet-stream" />
+                </xs:sequence>
+            </xs:complexType>
+
+            <xs:element name="exampleOperationSignAndEncrypt" type="ExampleOperationRequestType">
+            </xs:element>
+
+            <xs:element name="exampleOperationSign" type="ExampleOperationRequestType">
+            </xs:element>
+
+            <xs:element name="exampleOperationEncrypt" type="ExampleOperationRequestType">
+            </xs:element>
+
+            <xs:element name="exampleOperationNoWss" type="ExampleOperationRequestType">
+            </xs:element>
+
+            <xs:element name="exampleOperationResponse" type="ExampleOperationResponseType">
+            </xs:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsp:Policy wsu:Id="EmptyPolicy">
+        <!-- No security with this policy -->
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!-- Optionally allow MTOM in messages -->
+                <wsoma:OptimizedMimeSerialization wsp:Optional="true" />
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="SignAndEncryptPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!-- Responses from the Web service MUST be optimized using MTOM -->
+                <wsoma:OptimizedMimeSerialization />
+                <sp:AsymmetricBinding>
+                    <wsp:Policy>
+                        <!-- Client X.509-Certificate -->
+                        <sp:InitiatorToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:InitiatorToken>
+                        <!-- Server X.509-Certificate -->
+                        <sp:RecipientToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:RecipientToken>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <!-- Use strict Header Layout -->
+                                <sp:Strict />
+                            </wsp:Policy>
+                        </sp:Layout>
+                        <!-- Provide creation date and expiry in request -->
+                        <sp:IncludeTimestamp />
+                        <sp:OnlySignEntireHeadersAndBody />
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256 />
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                        <sp:EncryptSignature />
+                    </wsp:Policy>
+                </sp:AsymmetricBinding>
+                <!-- WSS 1.0 options-->
+                <sp:Wss10>
+                    <wsp:Policy>
+                        <sp:MustSupportRefIssuerSerial />
+                    </wsp:Policy>
+                </sp:Wss10>
+                <!-- sign and encrypt message body only -->
+                <sp:SignedParts>
+                    <sp:Body />
+                </sp:SignedParts>
+                <sp:EncryptedParts>
+                    <sp:Body />
+                </sp:EncryptedParts>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="SignPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!-- Responses from the Web service MUST be optimized using MTOM -->
+                <wsoma:OptimizedMimeSerialization />
+                <sp:AsymmetricBinding>
+                    <wsp:Policy>
+                        <!-- Client X.509-Certificate -->
+                        <sp:InitiatorToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:InitiatorToken>
+                        <!-- Server X.509-Certificate -->
+                        <sp:RecipientToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:RecipientToken>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <!-- Use strict Header Layout -->
+                                <sp:Strict />
+                            </wsp:Policy>
+                        </sp:Layout>
+                        <!-- Provide creation date and expiry in request -->
+                        <sp:IncludeTimestamp />
+                        <sp:OnlySignEntireHeadersAndBody />
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256 />
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                    </wsp:Policy>
+                </sp:AsymmetricBinding>
+                <!-- WSS 1.0 options-->
+                <sp:Wss10>
+                    <wsp:Policy>
+                        <sp:MustSupportRefIssuerSerial />
+                    </wsp:Policy>
+                </sp:Wss10>
+                <!-- sign and encrypt message body only -->
+                <sp:SignedParts>
+                    <sp:Body />
+                </sp:SignedParts>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="EncryptPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <!-- Responses from the Web service MUST be optimized using MTOM -->
+                <wsoma:OptimizedMimeSerialization />
+                <sp:AsymmetricBinding>
+                    <wsp:Policy>
+                        <!-- Client X.509-Certificate -->
+                        <sp:InitiatorToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:InitiatorToken>
+                        <!-- Server X.509-Certificate -->
+                        <sp:RecipientToken>
+                            <wsp:Policy>
+                                <!-- do NOT include the X509 certificate data in request, provide issuer reference only  -->
+                                <sp:X509Token
+                                    sp:IncludeToken="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token10 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:RecipientToken>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <!-- Use strict Header Layout -->
+                                <sp:Strict />
+                            </wsp:Policy>
+                        </sp:Layout>
+                        <!-- Provide creation date and expiry in request -->
+                        <sp:IncludeTimestamp />
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256 />
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                    </wsp:Policy>
+                </sp:AsymmetricBinding>
+                <!-- WSS 1.0 options-->
+                <sp:Wss10>
+                    <wsp:Policy>
+                        <sp:MustSupportRefIssuerSerial />
+                    </wsp:Policy>
+                </sp:Wss10>
+                <!-- Encrypt message body only -->
+                <sp:EncryptedParts>
+                    <sp:Body />
+                </sp:EncryptedParts>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsdl:message name="RequestMessageSignAndEncrypt">
+        <wsdl:part name="requestMessagePart" element="exampleOperationSignAndEncrypt" />
+    </wsdl:message>
+
+    <wsdl:message name="RequestMessageSign">
+        <wsdl:part name="requestMessagePart" element="exampleOperationSign" />
+    </wsdl:message>
+
+    <wsdl:message name="RequestMessageEncrypt">
+        <wsdl:part name="requestMessagePart" element="exampleOperationEncrypt" />
+    </wsdl:message>
+
+    <wsdl:message name="RequestMessageNoWss">
+        <wsdl:part name="requestMessagePart" element="exampleOperationNoWss" />
+    </wsdl:message>
+
+    <wsdl:message name="ResponseMessage">
+        <wsdl:part name="responseMessagePart" element="exampleOperationResponse" />
+    </wsdl:message>
+
+    <wsdl:portType name="ExamplePortType">
+
+        <wsdl:operation name="exampleOperationSignAndEncrypt">
+            <wsdl:input message="RequestMessageSignAndEncrypt" />
+            <wsdl:output message="ResponseMessage" />
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationSign">
+            <wsdl:input message="RequestMessageSign" />
+            <wsdl:output message="ResponseMessage" />
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationEncrypt">
+            <wsdl:input message="RequestMessageEncrypt" />
+            <wsdl:output message="ResponseMessage" />
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationNoWss">
+            <wsdl:input message="RequestMessageNoWss" />
+            <wsdl:output message="ResponseMessage" />
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+    <wsdl:binding name="ExampleBinding" type="ExamplePortType">
+    
+        <!-- <wsp:PolicyReference URI="#SignAndEncryptPolicy"/> -->
+        <!-- <wsp:PolicyReference URI="#EmptyPolicy"/> -->
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="exampleOperationSignAndEncrypt">
+            <soap:operation soapAction="exampleOperationSignAndEncrypt" />
+            <wsdl:input>
+                <wsp:PolicyReference URI="#SignAndEncryptPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <wsp:PolicyReference URI="#SignAndEncryptPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationSign">
+            <soap:operation soapAction="exampleOperationSign" />
+            <wsdl:input>
+                <wsp:PolicyReference URI="#SignPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <wsp:PolicyReference URI="#SignPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationEncrypt">
+            <soap:operation soapAction="exampleOperationEncrypt" />
+            <wsdl:input>
+                <wsp:PolicyReference URI="#EncryptPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <wsp:PolicyReference URI="#EncryptPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="exampleOperationNoWss">
+            <soap:operation soapAction="exampleOperationNoWss" />
+            <wsdl:input>
+                <wsp:PolicyReference URI="#EmptyPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <wsp:PolicyReference URI="#EmptyPolicy"/>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+    </wsdl:binding>
+
+    <wsdl:service name="ExampleService">
+        <wsdl:port name="ExamplePort" binding="ExampleBinding">
+            <soap:address location="http://localhost:8081/ExampleService/v1/ExamplePortType" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
