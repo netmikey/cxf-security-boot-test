@@ -25,6 +25,8 @@ This project's goal being to reproduce issues, it revolves around JUnit tests. W
 
 ### `CxfAttachmentStreamingTest`
 
+(See [CXF-9129](https://issues.apache.org/jira/browse/CXF-9129))
+
 These tests send a request to the server. The server then returns a response that contains a binary attachment. The server is set up such that it takes some time to stream the attachment data. We expect chunked streaming to take place. That is: the client should obtain the response in chunks while the server is still streaming the attachment. That is checked by capturing the timestamps of when the client receives the initial response body and when the server finishes streaming. It is expected that the client starts receiving the response before the server finishes streaming.
 
 Different tests in this class test this streaming hypothesis with different WebService Security Policies:
